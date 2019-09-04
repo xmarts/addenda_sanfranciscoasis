@@ -70,7 +70,7 @@
               <longText t-esc="rec.product_id.name" />
             </tradeItemDescriptionInformation>
             <invoicedQuantity unitOfMeasure="CA" t-esc="'%.2f'% rec.product_uom_qty" />
-            <aditionalQuantity QuantityType="NUM_CONSUMER_UNITS" t-esc="'%.2f'% rec.product_id.product_units" />
+            <aditionalQuantity QuantityType="NUM_CONSUMER_UNITS" t-esc="rec.product_id.product_units" />
             <grossPrice>
               <amount t-esc="'%.2f'% rec.price_unit" />
             </grossPrice>
