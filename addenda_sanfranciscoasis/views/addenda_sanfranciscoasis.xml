@@ -2,8 +2,7 @@
 
 <odoo>
   <data noupdate="0">
-    <template name="San francisco de asis" id="addenda_sanfranciscoasis">
-
+    <template name="San francisco de asis codigo" id="addenda_sanfranciscoasis">
       <requestForPayment t-att-DeliveryDate="record.date_invoice" type="SimpleInvoiceType" contentVersion="1.3.1" documentStructureVersion="AMC7.1" documentStatus="ORIGINAL">
         <t t-set="xml" t-value="record.l10n_mx_edi_get_xml_etree()"/>
         <requestForPaymentIdentification>
@@ -71,38 +70,12 @@
               <longText t-esc="rec.product_id.name"/>
             </tradeItemDescriptionInformation>
             <invoicedQuantity unitOfMeasure="CA" t-esc="'%.2f'% rec.product_uom_qty"/>
-            <aditionalQuantity QuantityType="NUM_CONSUMER_UNITS" t-esc="rec.product_id.product_units"/>
+            <aditionalQuantity QuantityType="NUM_CONSUMER_UNITS" t-esc="'%.2f'% rec.product_id.product_units"/>
             <grossPrice>
-               <t t-foreach="rec.tax_id" t-as="tac">
-                <t t-foreach="tac.tag_ids" t-as="tag">
-                  <t t-set="valunit" t-value="rec.price_unit"/>
-                    <t t-if="tag.name != 'IEPS'">
-                       <t t-if="tac.amount != 0">
-                        <t t-set="precdes" t-value="valunit / (1 + (tac.amount / 100)) "/>
-                         <Amount t-esc="'%.2f'% precdes"/>
-                        </t>
-                        <t t-else="">
-                         <Amount t-esc="'%.2f'% valunit"/>
-                        </t>
-                   </t> 
-                </t>
-              </t>
+              <amount t-esc="'%.2f'% rec.price_unit"/>
             </grossPrice>
             <netPrice>
-               <t t-foreach="rec.tax_id" t-as="tac">
-                <t t-foreach="tac.tag_ids" t-as="tag">
-                  <t t-set="valunit" t-value="rec.price_unit"/>
-                    <t t-if="tag.name != 'IEPS'">
-                       <t t-if="tac.amount != 0">
-                        <t t-set="precdes" t-value="valunit / (1 + (tac.amount / 100)) "/>
-                         <Amount t-esc="'%.2f'% precdes"/>
-                        </t>
-                        <t t-else="">
-                         <Amount t-esc="'%.2f'% valunit"/>
-                        </t>
-                   </t> 
-                </t>
-              </t>
+              <amount t-esc="'%.2f'% rec.price_unit"/>
             </netPrice>
             <AdditionalInformation>
               <referenceIdentification type="ON" t-field="record.fields_sales.number_order"/>
@@ -113,16 +86,14 @@
                   <t t-if="record.partner_id.show_ieps == False">
                     <t t-if="tag.name != 'IEPS'">
                       <t t-set="result" t-value="rec.price_unit"/>
-                      <t t-set="resultoper" t-value="result / (1 + (tac.amount / 100))"/>
+                      <t t-set="resultoper" t-value="result * (tac.amount / 100)"/>
                       <t t-set="amount" t-value="amount + resultoper"/>
-                      <t t-set="amountot" t-value="(resultoper * rec.product_uom_qty) * (tac.amount / 100)"/>
-                      
+                      <t t-set="amountot" t-value="amount * rec.product_uom_qty"/>
                       <tradeItemTaxInformation>
                         <taxTypeDescription>VAT</taxTypeDescription>
                         <tradeItemTaxAmount>
-                          <taxPercentage t-esc="'%.2f'% tac.amount"/>
+                          <taxPercentaje t-esc="'%.2f'% tac.amount"/>
                           <taxAmount t-esc="'%.2f'% amountot"/>
-                          
                         </tradeItemTaxAmount>
                       </tradeItemTaxInformation>
                     </t>
@@ -136,7 +107,7 @@
                       <tradeItemTaxInformation>
                         <taxTypeDescription>VAT</taxTypeDescription>
                         <tradeItemTaxAmount>
-                          <taxPercentage t-esc="'%.2f'% tac.amount"/>
+                          <taxPercentaje t-esc="'%.2f'% tac.amount"/>
                           <taxAmount t-esc="'%.2f'% amountot"/>
                         </tradeItemTaxAmount>
                       </tradeItemTaxInformation>
