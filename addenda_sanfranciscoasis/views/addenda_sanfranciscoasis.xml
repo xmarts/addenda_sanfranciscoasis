@@ -3,6 +3,7 @@
 <odoo>
   <data noupdate="0">
     <template name="San francisco de asis codigo" id="addenda_sanfranciscoasis">
+      <t t-if="record.type == 'out_invoice'">
       <requestForPayment t-att-DeliveryDate="record.date_invoice" type="SimpleInvoiceType" contentVersion="1.3.1" documentStructureVersion="AMC7.1" documentStatus="ORIGINAL">
         <t t-set="xml" t-value="record.l10n_mx_edi_get_xml_etree()"/>
         <requestForPaymentIdentification>
@@ -54,12 +55,12 @@
         <paymentTerms paymentTermsEvent="DATE_OF_INVOICE" PaymentTermsRelationTime="REFERENCE_AFTER">
           <netPayment netPaymentTermsType="BASIC_NET">
             <paymentTimePeriod>
-              <value t-field="record.fields_sales.payment_term_id"/>
+              
             </paymentTimePeriod>
           </netPayment>
         </paymentTerms>
         <t t-set="cont" t-value="0"/>
-        <t t-foreach="record.fields_sales.order_line" t-as="rec">
+        <t t-foreach="record.invoice_line_ids" t-as="rec">
           <t t-set="cont" t-value="cont + 1"/>
           <lineItem type="SimpleInvoiceLineItemType" t-att-number="cont">
             <tradeItemIdentification>
@@ -69,8 +70,8 @@
             <tradeItemDescriptionInformation>
               <longText t-esc="rec.product_id.name"/>
             </tradeItemDescriptionInformation>
-            <invoicedQuantity unitOfMeasure="CA" t-esc="'%.2f'% rec.product_uom_qty"/>
-            <aditionalQuantity QuantityType="NUM_CONSUMER_UNITS" t-esc="'%.2f'% rec.product_id.product_units"/>
+            <invoicedQuantity unitOfMeasure="CA" t-esc="'%.2f'% rec.quantity"/>
+            <aditionalQuantity QuantityType="NUM_CONSUMER_UNITS" t-esc="rec.product_id.product_units"/>
             <grossPrice>
               <amount t-esc="'%.2f'% rec.price_unit"/>
             </grossPrice>
@@ -81,14 +82,14 @@
               <referenceIdentification type="ON" t-field="record.fields_sales.number_order"/>
             </AdditionalInformation>
               <t t-set="amount" t-value="0"/>
-              <t t-foreach="rec.tax_id" t-as="tac">
+              <t t-foreach="rec.invoice_line_tax_ids" t-as="tac">
                 <t t-foreach="tac.tag_ids" t-as="tag">
                   <t t-if="record.partner_id.show_ieps == False">
                     <t t-if="tag.name != 'IEPS'">
                       <t t-set="result" t-value="rec.price_unit"/>
                       <t t-set="resultoper" t-value="result * (tac.amount / 100)"/>
                       <t t-set="amount" t-value="amount + resultoper"/>
-                      <t t-set="amountot" t-value="amount * rec.product_uom_qty"/>
+                      <t t-set="amountot" t-value="amount * rec.quantity"/>
                       <tradeItemTaxInformation>
                         <taxTypeDescription>VAT</taxTypeDescription>
                         <tradeItemTaxAmount>
@@ -103,7 +104,7 @@
                       <t t-set="result" t-value="rec.price_unit"/>
                       <t t-set="resultoper" t-value="result * (tac.amount / 100)"/>
                       <t t-set="amount" t-value="amount + resultoper"/>
-                      <t t-set="amountot" t-value="amount * rec.product_uom_qty"/>
+                      <t t-set="amountot" t-value="amount * rec.quantity"/>
                       <tradeItemTaxInformation>
                         <taxTypeDescription>VAT</taxTypeDescription>
                         <tradeItemTaxAmount>
@@ -136,7 +137,7 @@
         </t>
         <totalAmount>
           <t t-set="valamount" t-value="0"/>
-          <t t-foreach="record.fields_sales.order_line" t-as="rec">
+          <t t-foreach="record.invoice_line_ids" t-as="rec">
             <t t-set="valamount" t-value="valamount + rec.price_subtotal"/>
           </t>
           <Amount t-esc="'%.2f'% valamount"/>
@@ -155,10 +156,10 @@
         <t t-set="validipes" t-value="0"/>
         <t t-set="iepstotal" t-value="0"/>
         <t t-set="namieps" t-value="0"/>
-        <t t-foreach="record.fields_sales.order_line" t-as="rec">
+        <t t-foreach="record.invoice_line_ids" t-as="rec">
           <t t-set="amount" t-value="0"/>
           <t t-set="amountiep" t-value="0"/>
-            <t t-foreach="rec.tax_id" t-as="tac">
+            <t t-foreach="rec.invoice_line_tax_ids" t-as="tac">
               <t t-foreach="tac.tag_ids" t-as="tag">
                 <t t-if="record.partner_id.show_ieps == False">
                   <t t-if="tag.name != 'IEPS'">
@@ -205,10 +206,14 @@
           </t>
         </t>
         <payableAmount>
-          <t t-set="amountpay" t-value="record.fields_sales.amount_total"/>
+          <t t-set="amountpay" t-value="record.amount_total"/>
           <Amount t-esc="float(amountpay)"/>
         </payableAmount>
       </requestForPayment>
+      </t>
+      <t t-if="record.type != 'out_invoice'">
+        <requestForPayment></requestForPayment>
+        </t>
 
     </template>
     <record id="addenda_sanfranciscoasis" model="ir.ui.view">
